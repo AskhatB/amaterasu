@@ -5,6 +5,12 @@ import axios from 'axios'
 import Header from '../components/Header'
 import PieChart from "react-svg-piechart"
 
+import FusionCharts from 'fusioncharts';
+import Charts from 'fusioncharts/fusioncharts.charts';
+import ReactFC from 'react-fusioncharts';
+
+Charts(FusionCharts);
+
 
 class Main extends Component{
 	constructor(props){
@@ -12,68 +18,120 @@ class Main extends Component{
 		this.state = {
 			searchInput: null,
 			searchByCity: "Алматы",
+			listOfSections: null,
 			data: [],
-			postcodes: []
+			postcodes: [],
+			myDataSource: {
+			  chart: {
+			    caption: 'Top 10 enterprise sections in Almaty',
+			    subCaption: '',
+			  },
+			  data: [{}]
+			},
+			section: 0,
+			areas: []
 		}
 	}
-
-	searchHandle(){
-		axios.post('/api/search', {city:this.state.searchByCity})
-		.then(res => {
-			// console.log(res)
-		})
-	}
-
 
 	componentWillMount(){
 		axios.get('/api/enterprises').then(response => {
 			this.setState({...this.state, data: response.data.docs})
+		})
+		axios.post('/api/area').then(res => {
+			this.setState({...this.state, areas: res.data.docs})
+		})
+		axios.post('/api/insert').then(res => {
+			this.setState({...this.state, listOfSections: res.data.docs})
+		})
+		this.pieChartData()
+	}
+
+
+	pieChartData(){
+		axios.post('/api/labels').then(response => {
+			response.data.docs.map((value) => {
+				this.setState({
+					myDataSource: {
+						...this.state.myDataSource,
+						data:[
+							...this.state.myDataSource.data,
+							{
+								label: value._id,
+								value: value.count
+							}
+						]
+					}
+				})
+			})
 		})
 	}
 
 
 	
 	render(){
-		const data = [
-		  {title: "Data 1", value: 100, color: "#22594e"},
-		  {title: "Data 2", value: 60, color: "#2f7d6d"},
-		  {title: "Data 3", value: 30, color: "#3da18d"},
-		  {title: "Data 4", value: 20, color: "#69c2b0"},
-		  {title: "Data 5", value: 10, color: "#a1d9ce"},
-		]
+
+		const chartConfigs = {
+		  type: 'pie3d',
+		  width: 1000,
+		  height: 400,
+		  dataFormat: 'json',
+		  dataSource: this.state.myDataSource,
+		};
 		return(
 			<div className="Main">
 			<Header />
 			<div className="sep-100"></div>
 				<div className="container">
 					<div className="row">
-
 						<div className="col-6 d-flex">
+						<div>
+							<div className="small-text">Name</div>
 							<input 
 								type="text" 
 								className="form-control search"
 								onChange={(event) => this.setState({...this.state, searchInput: event.target.value})}
+								style={{'width':'367px'}}
 							/>
+						</div>
+						
 							<button 
 								type="button" 
 								className="btn btn-primary" 
-								onClick={() => this.searchHandle()}
-							>Search
+								onClick={() => this.props.history.push(`/search/${this.state.searchInput}`)}
+								style={{'margin-top': '22px','margin-left': '-1px'}}
+							>Search by name
 							</button>
+						
 						</div>
 					</div>
 					<div className="row">
-						<div className="col-3">
-							<div className="sep-30"></div>
-							<div className="small-text">City</div>
-							<select 
-								className="form-control selcls"
-								onChange={(event) => this.setState({...this.state, searchByCity: event.target.value})}
-							>
-							  <option value="Алматы">Almaty</option>
-							  <option value="Астана">Astana</option>
-							  <option value="Костанай">Kostanay</option>
-							</select>
+						<div className="col-3 d-flex align-items-center justify-content-between" style={{'margin-top': '20px'}}>
+							<div>
+								<div className="small-text">Section</div>
+							
+								<select 
+									className="form-control selcls"
+									onChange={(event) => this.setState({...this.state, section: event.target.value})}
+									style={{'width':'367px'}}
+								>
+								<option value={0}>Choose section</option>
+								{
+									this.state.listOfSections ?
+										this.state.listOfSections.map((value, index) => {
+											return value._id ? <option value={index}>{value._id}</option> : null
+										})
+									:null
+								}
+								</select>
+							</div>
+								<Link to={`/sections/${this.state.section}`}>
+									<button 
+										type="button" 
+										className="btn btn-primary" 
+										style={{'margin-top': '22px','margin-left': '29px'}}
+									>Search by section
+									</button>
+								</Link>
 						</div>
 					</div>					
 					<div className="sep-30"></div>
@@ -85,19 +143,12 @@ class Main extends Component{
 						</div>
 					</div>
 					<div className="row">
-						<div className="col">
-							<PieChart
-								data={data}
-								expandSize={36}
-								expandOnHover
-								onSectorHover={(d, i, e) => {
-							      if (d) {
-							        console.log("Mouse enter - Index:", i, "Data:", d, "Event:", e)
-							      } else {
-							        console.log("Mouse leave - Index:", i, "Event:", e)
-							      }
-							    }}
-							/>
+						<div className="col" style={{'border':'2px solid #007bff', 'padding': '0', 'max-width': 'max-content', 'margin':' 50px auto', 'z-index': '999'}}>
+						{
+							this.state.myDataSource.data ?
+							<ReactFC {...chartConfigs} />
+							: <div>Loading</div>
+						}
 						</div>
 					</div>
 				</div>

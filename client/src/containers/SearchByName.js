@@ -8,12 +8,26 @@ class ListOfEnterprises extends Component{
 			data: []
 		}
 	}
-	componentWillMount(){
-		axios.get('/api/enterprises').then(res =>{
-			this.setState({...this.state, data: res.data.docs})
+
+	searchHandle(){
+		axios.post('/api/search', {name:this.props.match.params.name})
+		.then(res => {
+			this.setState({data: res.data.docs})
 		})
 	}
 
+	deleteEnterprise(id){
+		axios.post('/api/delete', {id: id}).then(res => {
+			console.log(res)
+		}).then(res => {
+			this.props.history.push('/')
+		})
+
+	}
+
+	componentWillMount(){
+		this.searchHandle()
+	}
 	render(){
 		return(
 			<div className="container">
@@ -55,6 +69,9 @@ class ListOfEnterprises extends Component{
 										</li>
 										: null
 									}
+									<li className="list-group-item">
+										<button className="btn btn-danger" onClick={() => this.deleteEnterprise(value._id)}>Delete</button>
+									</li>
 								</ul>
 							</div>
 						)

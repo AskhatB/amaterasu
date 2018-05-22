@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
+
 const MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/test';
 
@@ -16,7 +18,6 @@ var findDocuments = function(db, callback) {
 
     collection.find().toArray(function(err,docs){
         if (err) throw err;
-        // console.log(docs);
         app.get('/api/enterprises', (req, res) => {
 		  res.send( { docs } );
 		});
@@ -25,7 +26,6 @@ var findDocuments = function(db, callback) {
     })
 
      app.post('/api/search', (req, res) => {
-        console.log(req.body.city)
         collection.find({"Населенные пункты": req.body.city}).toArray(function(err,docs){
             if (err) throw err;
             res.send({docs})
