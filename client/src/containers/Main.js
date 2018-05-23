@@ -43,40 +43,40 @@ class Main extends Component{
 		axios.post('/api/insert').then(res => {
 			this.setState({...this.state, listOfSections: res.data.docs})
 		})
-		this.pieChartData()
+		// this.pieChartData()
 	}
 
 
-	pieChartData(){
-		axios.post('/api/labels').then(response => {
-			response.data.docs.map((value) => {
-				this.setState({
-					myDataSource: {
-						...this.state.myDataSource,
-						data:[
-							...this.state.myDataSource.data,
-							{
-								label: value._id,
-								value: value.count
-							}
-						]
-					}
-				})
-			})
-		})
-	}
+	// pieChartData(){
+	// 	axios.post('/api/labels').then(response => {
+	// 		response.data.docs.map((value) => {
+	// 			this.setState({
+	// 				myDataSource: {
+	// 					...this.state.myDataSource,
+	// 					data:[
+	// 						...this.state.myDataSource.data,
+	// 						{
+	// 							label: value._id,
+	// 							value: value.count
+	// 						}
+	// 					]
+	// 				}
+	// 			})
+	// 		})
+	// 	})
+	// }
 
 
 	
 	render(){
 
-		const chartConfigs = {
-		  type: 'pie3d',
-		  width: 1000,
-		  height: 400,
-		  dataFormat: 'json',
-		  dataSource: this.state.myDataSource,
-		};
+		// const chartConfigs = {
+		//   type: 'pie3d',
+		//   width: 1000,
+		//   height: 400,
+		//   dataFormat: 'json',
+		//   dataSource: this.state.myDataSource,
+		// };
 		return(
 			<div className="Main">
 			<Header />
@@ -143,12 +143,10 @@ class Main extends Component{
 						</div>
 					</div>
 					<div className="row">
-						<div className="col" style={{'border':'2px solid #007bff', 'padding': '0', 'max-width': 'max-content', 'margin':' 50px auto', 'z-index': '999'}}>
-						{
-							this.state.myDataSource.data ?
-							<ReactFC {...chartConfigs} />
-							: <div>Loading</div>
-						}
+						<div className="col" style={{'margin-top': '25px'}}>
+							<Link to="/piechart">
+								<button className="btn btn-success">Chart</button>
+							</Link>
 						</div>
 					</div>
 				</div>

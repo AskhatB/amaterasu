@@ -101,8 +101,6 @@ var findDocuments = function(db, callback) {
 
 MongoClient.connect(url, function(err, client){
     if (err) throw err;
-    // console.log("it is working");
-    // db.close();
     findDocuments(client.db('test'), function(){
         db.close();
     });
